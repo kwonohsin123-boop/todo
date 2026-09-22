@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# claude code
+/.claude/plans/
+/.claude/settings.local.json
+
+# local sqlite database (PRD 8.1) — WAL 모드의 .db-wal · .db-shm 도 함께 제외됩니다
+/data/*
+!/data/.gitkeep
+
+# MCP 서버 로컬 데이터 — .mcp.json의 DATA_DIR이 이 머신 절대경로로 고정돼 있습니다
+/shrimp-data/
+
+# Playwright MCP 출력물 — 검증 화면을 브라우저로 열 때 생기는 스크린샷·트레이스
+/.playwright-mcp/
+/.playwright-cli/
