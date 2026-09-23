@@ -10,6 +10,30 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+
+  /*
+   * --text-title — PRD(docs/기획서_결과.md) §9.3의 페이지 타이틀 32px/700 전용 스텝입니다.
+   * Tailwind v4 기본 스텝에는 32px만 없습니다(node_modules/tailwindcss/theme.css 359~362행:
+   * --text-3xl = 1.875rem = 30px, --text-4xl = 2.25rem = 36px). text-3xl로 두면 2px 모자란 채
+   * 빌드도 린트도 통과하므로 아무도 눈치채지 못합니다. 그래서 이 한 단계만 토큰으로 확정합니다.
+   *
+   * line-height 짝을 반드시 함께 둡니다. 같은 theme.css에서 --text-xs ~ --text-9xl 12단계가
+   * 전부 `--text-<name>--line-height` 짝을 갖기 때문에, 이것만 짝이 없으면 text-title이
+   * 줄높이를 지정하지 않고 상속값에 기대는 유일한 예외가 되어 조용히 어긋납니다.
+   * 값은 인접 스텝의 관용구(3xl: calc(2.25 / 1.875), 4xl: calc(2.5 / 2.25))와 같은 문법인
+   * calc(2.5 / 2) — 2rem 글자에 2.5rem 줄높이로, 위아래 스텝과 같은 계단을 밟습니다.
+   *
+   * :root / .dark 두 곳에 넣지 않는 것이 의도입니다. shrimp-rules.md §5.3의 "세 곳 함께" 규칙은
+   * 색 토큰 규칙이고, 글자 크기가 테마별로 달라질 이유는 없습니다. 규칙 위반으로 오해해
+   * :root로 옮기면 의미 없는 분기만 늘고 다크에서만 크기가 어긋날 여지가 생깁니다.
+   *
+   * 나머지 세 단계(24 / 16 / 14px)는 새 토큰을 만들지 않고 text-2xl · text-base · text-sm을
+   * 그대로 씁니다. 네 단계를 모두 토큰화하면 기본 스텝과 이름이 겹치는 층이 하나 더 생겨
+   * 화면마다 "무엇을 쓰나"를 다시 판단해야 합니다.
+   */
+  --text-title: 2rem;
+  --text-title--line-height: calc(2.5 / 2);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -84,6 +108,23 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/**
+ * 여기의 중성 토큰(background/foreground/card/primary/secondary/muted/accent/border/input/ring,
+ * sidebar-* 포함)은 스타터킷 원본 값 그대로입니다. `:root`만 PRD §9.1 값으로 조정해서
+ * 라이트와 어긋나 보이지만, 이는 누락이 아니라 결정입니다.
+ *
+ * 근거: PRD(docs/기획서_결과.md) §9.1 말미 — 레퍼런스인 docs/assets/DESIGN.md는 흰 캔버스
+ * 기준만 기술하고 다크 값을 아예 규정하지 않습니다. 그 문서의 Unknowns 조항("미해결 값을
+ * 그럴듯한 기본값으로 대체하지 말 것")에 따라, 근거 없는 값을 지어내 채우는 대신 스타터킷
+ * 기본값을 유지합니다.
+ *
+ * 되돌림 위험: "다크가 DESIGN.md와 안 맞는다"는 이유로 이 값들을 손대면, 출처 없는 값이
+ * 들어와도 빌드·린트가 통과하므로 아무도 눈치채지 못한 채 근거가 사라집니다. 다크 중성 값을
+ * 바꾸려면 먼저 PRD §9.1을 개정하십시오.
+ *
+ * 예외는 --chart-1 ~ --chart-5 뿐입니다(PRD §9.2). 라이트 값의 밝기를 뒤집은 것이 아니라
+ * 다크 배경 위 대비를 위해 따로 계단을 밟은 별도 값이므로, 라이트와 숫자가 다른 것이 정상입니다.
+ */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

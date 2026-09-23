@@ -8,39 +8,50 @@
 
 ---
 
-## 0. 현재 상태 (착수 시점 실측)
+## 0. 현재 상태 (2026-09-23 실측)
 
-검증 시점 **2026-09-22** · 저장소 `C:\workspace\todo` · git `master` 브랜치, **커밋 0건 · 전체 untracked**.
+검증 시점 **2026-09-23** · 저장소 `C:\workspace\todo` · git **`main` 브랜치, 커밋 2건** (`8379ac8` 초기 커밋 — 스타터킷 정리와 데이터 계층 스캐폴딩 / `4589775` `.gitattributes`). M0 변경분(`globals.css` · `page.tsx` 등)은 **아직 워킹 트리에 미커밋** 상태입니다.
+
+> **이 절은 2026-09-22 착수 시점이 아니라 2026-09-23 실측입니다.** 커밋 `8379ac8`에서 M0 구현 체크리스트 8개 중 6개와 M1-A(DB 계층)가 선반영되었기 때문에, 아래 두 표를 실제 파일·행 번호로 다시 맞췄습니다. **행 번호는 이번 M0에서 `globals.css`에 주석 두 블록이 들어가 전부 밀렸습니다** — 예전 문서의 번호를 그대로 옮겨 적지 마십시오.
 
 ### 0.1 이미 되어 있는 것
 
-| 항목 | 상태 | 근거 |
+| 항목 | 상태 | 근거 (2026-09-23 실측) |
 | :--- | :--- | :--- |
 | Next.js 16.3.5 App Router + React 19.2.8 | 설치·동작 | `package.json` |
-| Tailwind v4 (설정 파일 없음, 토큰 1곳) | 구성 완료 | `src/app/globals.css` — `@theme inline`(7~48행) · `:root`(53~75행) · `.dark`(88~109행) |
+| Tailwind v4 (설정 파일 없음, 토큰 1곳) | 구성 완료 | `src/app/globals.css` — `@theme inline`(7~74행) · `:root`(76~109행) · `.dark`(128~160행) |
 | shadcn 프리미티브 23개 (Base UI 기반) | 생성 완료 | `src/components/ui/` — `button` `card` `checkbox` `dialog` `input` `select` `table` `tabs` 등 |
 | 다크 모드 5조각 배선 | 동작 | `globals.css:5` `@custom-variant` + `src/app/layout.tsx`의 `ThemeProvider` · `suppressHydrationWarning` |
 | Server Action + `useActionState` + `revalidatePath` 레퍼런스 | 동작 | `src/app/examples/server-actions/actions.ts` ↔ `src/lib/examples/guestbook.ts` |
-| 스택 검증 화면 9개 | 동작 | `src/app/examples/**`, 인덱스는 `src/lib/examples/examples-nav.ts` |
+| 스택 검증 화면 9개 | 동작 | `src/app/examples/**`, 인덱스는 `src/lib/examples/examples-nav.ts` (항목 9개) |
 | 로케일·타임존 고정 포맷터 | 동작 | `src/lib/examples/timing.ts`의 `formatServerTime` (`ko-KR` / `Asia/Seoul`) |
+| **DESIGN.md 중성 토큰 반영** (PRD §9.1) | **적용 완료** | `globals.css:78` `--foreground: oklch(0 0 0)` · `:83` `--primary: oklch(0 0 0)` · `:85`/`:87`/`:89` `--secondary`/`--muted`/`--accent` = `oklch(0.976 0 0)` · `:88` `--muted-foreground: oklch(0.387 0 0)` · `:92`/`:93` `--border`/`--input` = `oklch(0.925 0 0)` |
+| **`.dark` 중성 토큰은 스타터킷 값 유지 (결정)** | **근거 주석 기록됨** | `globals.css:111-127` — PRD §9.1 말미의 DESIGN.md Unknowns 조항. 누락이 아니라 결정이며, 되돌리려면 PRD 개정이 먼저 |
+| **`--radius` 0.375rem** | **적용 완료** | `globals.css:100` |
+| **`--radius-xs`** | **`@theme inline`에 존재** | `globals.css:66` `--radius-xs: calc(var(--radius) * 0.4)` → `xs < sm < md < lg` 역전 해소 |
+| **타입 스케일 32px = `--text-title` 토큰** | **추가·적용 완료** | `globals.css:34-35`(결정 근거 주석 14~33행), 적용처는 `src/app/page.tsx:26`의 h1 한 곳 |
+| **Pretendard Variable 배선** | **완료** | `src/app/layout.tsx:17-23` — `localFont({ src: "../fonts/PretendardVariable.woff2", variable: "--font-sans", weight: "45 920" })`. 폰트 파일 `src/fonts/PretendardVariable.woff2`(+`LICENSE.txt`). mono는 `Geist_Mono`/`--font-geist-mono` 존치(`layout.tsx:26-29`) |
+| **차트 5색** (M5 선반영) | **라이트·다크 서로 다른 유채색 5쌍** | `globals.css:95-99`(`:root`) ↔ `147-151`(`.dark`) |
+| **DB 계층 (Drizzle + better-sqlite3)** | **설치·스캐폴딩 완료** | `package.json` — `drizzle-orm` `better-sqlite3` / dev `drizzle-kit` `@types/better-sqlite3`. `drizzle.config.ts`, `src/db/schema.ts`(`tasks` 11컬럼 + `UNIQUE(planned_date, mit_order)` + `CHECK` + 인덱스), `src/db/client.ts`(`globalThis` 싱글턴 · WAL), `drizzle/0000_concerned_the_enforcers.sql`, `data/todo.db` 생성됨 |
+| **`@dnd-kit/*` 4종** | **설치 완료** | `package.json` — `@dnd-kit/core` `@dnd-kit/modifiers` `@dnd-kit/sortable` `@dnd-kit/utilities` |
+| **`.gitignore`의 DB 산출물 제외** | **완료** | `.gitignore:48-50` — `/data/*` + `!/data/.gitkeep`. `git ls-files data/`는 `.gitkeep`만 반환 |
+| **검증·DB npm 스크립트** | **완료** | `package.json` scripts — `check-all`(lint → build → typecheck) · `db:generate` · `db:migrate` · `db:studio` |
 
 ### 0.2 아직 없는 것
 
-| 항목 | 상태 | 근거 |
+| 항목 | 상태 | 근거 (2026-09-23 실측) |
 | :--- | :--- | :--- |
-| **TODO 도메인 기능 전부** | 없음 | `src/app/page.tsx`는 스타터킷 소개 랜딩. MIT·타임블록·진행률 바 코드 없음 |
-| **DB 계층** | 없음 | `drizzle-orm` · `better-sqlite3` · `drizzle-kit` 모두 `package.json`에 없음. `src/db/` · `drizzle.config.ts` · `data/` 디렉터리 부재 |
-| **`@dnd-kit/*`** | 없음 | `package.json` 미등재 |
-| **Pretendard** | 없음 | `src/app/layout.tsx:12`는 여전히 `Geist({ variable: "--font-sans" })` |
-| **DESIGN.md 토큰 반영** | 미적용 | `--foreground: oklch(0.145 0 0)`, `--primary: oklch(0.205 0 0)`, `--radius: 0.625rem` — PRD §9.1/§9.4 목표값과 다름 |
-| **차트 5색** | 무채색·라이트=다크 동일 | `globals.css:70-74` ↔ `105-109` 값이 같음 |
-| **`--radius-xs`** | `@theme`에 없음 | `globals.css:42-48`에 `sm`~`4xl`만 존재 → `rounded-xs`가 `rounded-sm`보다 작은 역전 |
-| **테스트 러너** | **없음** | `package.json` scripts에 test 없음. 검증은 `npm run lint` + `npx tsc --noEmit` + `npm run build` + 브라우저 확인뿐 |
+| **TODO 도메인 기능 전부** | 없음 | `src/app/page.tsx`는 h1과 TODO 주석만 있는 **빈 앱 셸**. MIT 목록·타임블록·진행률 바 구현 없음 |
+| **Server Action** | 없음 | `src/app/actions.ts` **미생성** |
+| **데이터 계층의 나머지** | **부분** | `src/lib/tasks.ts`에 `MIT_SLOTS` · `TaskFormState` · `initialTaskFormState` · `todayKey` · `isDone` · `listTasksByDate`만 존재. **완료율 계산과 MIT/일반 분리 조회 없음** |
+| **`focus_sessions` 테이블** | 없음 | `src/db/schema.ts:51-52` 주석 — M4에서 새 마이그레이션으로 추가 예정 |
+| **테스트 러너** | **없음** | `package.json` scripts에 test 없음. 정적 검증은 `npm run check-all` 하나, 동작 검증은 **Playwright MCP**뿐 |
 
-### 0.3 검증 수단 (이 문서의 모든 DoD가 이 4가지만 씁니다)
+### 0.3 검증 수단 (이 문서의 모든 DoD가 아래 수단만 씁니다)
 
 | 수단 | 명령 · 도구 | 주의 |
 | :--- | :--- | :--- |
+| **정적 검증 일괄** | `npm run check-all` | 아래 3개를 **lint → build → typecheck 순서 고정**으로 돌립니다. 이 순서인 이유는 `tsc`가 참조하는 `PageProps`/`LayoutProps`가 `next build` 산출물(`.next/types`)에 있기 때문입니다 |
 | 린트 | `npm run lint` | `next build`는 린트를 실행하지 않습니다(Next 16). 반드시 따로 |
 | 타입 | `npx tsc --noEmit` | 갓 클론한 트리는 `.next/types`가 없어 `PageProps`/`LayoutProps`를 못 찾습니다. **dev 또는 build를 한 번 돌린 뒤** 실행 |
 | 빌드 + 프로덕션 확인 | `npm run build && npm run start` | 캐시·`revalidatePath`·LCP는 **`next dev`에서 검증 불가** |
@@ -78,7 +89,22 @@
 
 **3. 캐시·`revalidatePath`·LCP가 걸린 테스트는 `npm run build && npm run start` 위에서** Playwright MCP로 수행합니다. `next dev`는 매 요청 재렌더하므로 차이가 드러나지 않습니다.
 
-**4. 콘솔 확인을 매 Phase DoD에 포함합니다.** `/examples/components`의 의도된 Avatar 404 한 건 외에 콘솔 에러가 있으면 회귀입니다.
+**4. 콘솔 확인을 매 Phase DoD에 포함합니다. 허용되는 콘솔 오류는 아래 2건뿐이며, 그 외에 무언가 있으면 회귀입니다.**
+
+| # | 화면 | 메시지 | 출처와 이유 |
+| :---: | :--- | :--- | :--- |
+| 1 | `/examples/components` | 이미지 404 | `AvatarImage`의 로드 실패 → `Fallback` 전환을 보여주는 **의도된 데모** |
+| 2 | `/examples/error-handling` | `Failed to load resource: 404` @ `/examples/posts/없는-글?_rsc=…` | `src/app/examples/error-handling/page.tsx:104`의 `href="/examples/posts/없는-글"`을 Next `<Link>`의 **기본 프리페치**가 미리 당겨오면서 서버가 404를 응답. 404 처리 경로를 보여주려고 일부러 둔 링크이므로 성격은 1번과 같은 "의도된 데모의 부수효과"입니다 |
+
+> **2번이 2026-09-23에야 목록에 추가된 이유.** 기존 문구는 dev 기준으로 쓰였고, dev에서는 `notFound()`가 남기는 "Encountered a script tag…" 노이즈에 묻혀 있었을 가능성이 큽니다. **프로덕션 빌드(`npm run build && npm run start`)로 12개 화면(`/` · `/examples` 인덱스 · 검증 화면 9개 · `/icons`)을 순회한 것은 M0-4가 처음**이었고 거기서 드러났습니다. M0 회귀가 아닙니다 — M0가 변경한 파일은 `globals.css`와 `page.tsx` 둘뿐이고 `error-handling/page.tsx`는 `git diff --stat`에 나타나지 않습니다.
+>
+> 링크에 `prefetch={false}`를 주면 사라지지만 **그 수정은 하지 않습니다.** `/examples`는 판정 도구이고(§1), 판정 도구를 판정 통과를 위해 고치면 기준선이 흔들립니다.
+>
+> M1~M5 각 Phase DoD에 남아 있는 "의도된 1건" 표기는 **이 표의 2건**을 가리킵니다.
+
+**4-1. 판정 시 부딪히는 직렬화 함정 — `oklch()`는 `lab()`으로 읽힙니다.**
+
+Chrome은 `oklch()`로 선언된 색을 `getComputedStyle`에서 **`lab()` 문법으로 직렬화**합니다. 그래서 `/examples/theme`의 computed 값 표에는 `rgb(...)`가 아니라 `lab(...)`이 표시됩니다. DoD가 `rgb(0, 0, 0)`·`#444444` 같은 sRGB 표기로 쓰여 있으면 **표의 문자열과 직접 비교되지 않으므로** sRGB로 환산한 뒤 대조하십시오. 값이 달라 보인다고 토큰을 고치지 마십시오.
 
 **5. 테스트 시나리오는 PRD의 Given-When-Then에서 가져옵니다.** 수용 조건을 새로 지어내지 않습니다.
 
@@ -107,7 +133,7 @@
 
 | Phase | 목표 | MoSCoW | 규모 | 선행 |
 | :--- | :--- | :--- | :---: | :--- |
-| **M0** | 디자인 기반(색·폰트·반경)을 DESIGN.md 기준으로 맞춘다 | — | M | 없음 |
+| **M0** (완료) | 디자인 기반(색·폰트·반경)을 DESIGN.md 기준으로 맞춘다 — **2026-09-23 완료(구현 8 + 테스트 5)** | — | M | 없음 |
 | **M1** | 오늘의 MIT 3개를 등록하고 완료 체크와 진행률을 눈으로 본다 | Must ①③ | L | M0 |
 | **M2** | 할 일을 단축키로 빠르게 넣고 타임라인에 드래그해 배치한다 | Must ② | L | M1 |
 | **M3** | MVP를 프로덕션 빌드에서 마감한다(성능·키보드·회귀) | Must 마감 | M | M2 |
@@ -145,26 +171,47 @@ M0 디자인 토큰 ──┐
 
 **선행 조건**: 없음. 가장 먼저 착수합니다.
 
+**상태: 완료 (2026-09-23).** 구현 8 + 테스트 5 = 13개 전부 통과했습니다.
+
+> **반영 경위가 두 갈래입니다.** 아래 구현 8개 중 **6개(`:root` 중성 토큰 · `--radius` · `--radius-xs` · Pretendard 파일 · `layout.tsx` 배선 · `.gitignore`)는 커밋 `8379ac8`("스타터킷 정리와 데이터 계층 스캐폴딩")에 이미 들어가 있었고**, 2026-09-23에 한 것은 **`.dark` 결정 주석(M0-1)과 타입 스케일(M0-2) 두 개 + 테스트 5개**입니다. 나중에 `git log`를 보고 "왜 M0가 두 커밋에 걸쳐 있나"를 다시 추적하지 않도록 여기에 남깁니다.
+
 ### 작업 체크리스트
 
-- [ ] `src/app/globals.css`의 `:root` 중성 토큰 5종을 PRD §9.1 값으로 교체 — `--foreground` `--primary` → `oklch(0 0 0)`, `--muted`/`--secondary`/`--accent` → `oklch(0.976 0 0)`, `--border`/`--input` → `oklch(0.925 0 0)`, `--muted-foreground` → `oklch(0.387 0 0)` **(S)**
-- [ ] `.dark`의 중성 토큰은 **건드리지 않는다**는 결정을 주석으로 남기기 (PRD §9.1: DESIGN.md가 다크 값을 규정하지 않음) — `src/app/globals.css` **(S)**
-- [ ] `--radius`를 `0.625rem` → `0.375rem`으로 낮추기 — `src/app/globals.css:75` **(S)**
-- [ ] `@theme inline`에 `--radius-xs: calc(var(--radius) * 0.4)` 추가 (현재 `sm`~`4xl`만 있어 `rounded-xs`가 `rounded-sm`보다 작은 역전 상태) — `src/app/globals.css:42-48` **(S)**
-- [ ] `npm i pretendard` 후 Variable woff2를 `src/fonts/`로 복사 **(S)**
-- [ ] `next/font/local`로 Pretendard 로드, **CSS 변수명은 `--font-sans` 그대로 유지**, `Geist` import 제거, `Geist_Mono`(`--font-geist-mono`)는 존치 — `src/app/layout.tsx:1-20` **(M)**
-- [ ] `data/` 산출물과 폰트 바이너리 제외 규칙 정리 — `.gitignore`에 `/data/` 추가 (PRD §8.1: DB 파일은 커밋하지 않음) **(S)**
-- [ ] 타입 스케일 4단계(32/700 · 24/700 · 16/400 · 14/600)를 앞으로 쓸 유틸리티 조합으로 정하고 M1 헤딩에 적용할 기준을 결정 (PRD §9.3 표) **(S)**
+- [x] `src/app/globals.css`의 `:root` 중성 토큰 5종을 PRD §9.1 값으로 교체 — `--foreground` `--primary` → `oklch(0 0 0)`, `--muted`/`--secondary`/`--accent` → `oklch(0.976 0 0)`, `--border`/`--input` → `oklch(0.925 0 0)`, `--muted-foreground` → `oklch(0.387 0 0)` **(S)** — `8379ac8` 선반영, 현재 `globals.css:78,83,85,87,88,89,92,93`
+- [x] `.dark`의 중성 토큰은 **건드리지 않는다**는 결정을 주석으로 남기기 (PRD §9.1: DESIGN.md가 다크 값을 규정하지 않음) — `src/app/globals.css:111-127` **(S)** — 2026-09-23(M0-1), 토큰 값 변경 0
+- [x] `--radius`를 `0.625rem` → `0.375rem`으로 낮추기 — 현재 `src/app/globals.css:100` **(S)** — `8379ac8` 선반영
+- [x] `@theme inline`에 `--radius-xs: calc(var(--radius) * 0.4)` 추가 (`rounded-xs`가 `rounded-sm`보다 작던 역전 해소) — 현재 `src/app/globals.css:66` **(S)** — `8379ac8` 선반영
+- [x] `npm i pretendard` 후 Variable woff2를 `src/fonts/`로 복사 **(S)** — `8379ac8` 선반영, `src/fonts/PretendardVariable.woff2` + `LICENSE.txt`
+- [x] `next/font/local`로 Pretendard 로드, **CSS 변수명은 `--font-sans` 그대로 유지**, `Geist` import 제거, `Geist_Mono`(`--font-geist-mono`)는 존치 — 현재 `src/app/layout.tsx:17-23`(sans) · `:26-29`(mono) **(M)** — `8379ac8` 선반영
+- [x] `data/` 산출물과 폰트 바이너리 제외 규칙 정리 — `.gitignore:48-50`(`/data/*` + `!/data/.gitkeep`) (PRD §8.1: DB 파일은 커밋하지 않음) **(S)** — `8379ac8` 선반영
+- [x] 타입 스케일 4단계(32/700 · 24/700 · 16/400 · 14/600)를 앞으로 쓸 유틸리티 조합으로 정하고 M1 헤딩에 적용할 기준을 결정 (PRD §9.3 표) **(S)** — 2026-09-23(M0-2). 결정 내용은 아래 "타입 스케일 결정" 참조
 
-**테스트 (Playwright MCP)**
+**테스트 (Playwright MCP)** — 5개 전부 **`npm run build && npm run start -p 3100`(프로덕션 빌드) 위에서** 2026-09-23 수행
 
-- [ ] ↳ 테스트: `/examples/theme`을 열어 라이트 computed 값 표에서 `--foreground`·`--primary`·`--muted-foreground`를 `browser_snapshot`으로 읽어 목표값과 대조 **(S)**
-- [ ] ↳ 테스트: `browser_click`으로 다크 토글 후 같은 표를 다시 읽어 `.dark` 중성 토큰이 변경 전과 동일한지 확인 **(S)**
-- [ ] ↳ 테스트: `/examples/theme`의 radius 스케일에서 `rounded-xs < sm < md < lg` 순서와 `rounded-lg` = 6px 확인 **(S)**
-- [ ] ↳ 테스트: `/examples/assets`의 폰트 실측 표에서 `font-sans`에 Pretendard가, `font-mono`에 Geist Mono가 나타나는지 확인 **(S)**
-- [ ] ↳ 테스트: `/`·`/examples` 9개 화면을 순회하며 `browser_console_messages`로 콘솔 회귀 확인 (의도된 Avatar 404 1건 제외) **(S)**
+- [x] ↳ 테스트: `/examples/theme`을 열어 라이트 computed 값 표에서 `--foreground`·`--primary`·`--muted-foreground`를 `browser_snapshot`으로 읽어 목표값과 대조 **(S)** — `--foreground`/`--primary` = `rgb(0,0,0)`, `--muted-foreground` = `rgb(68,68,68)`(`#444444`), `--muted`/`--secondary`/`--accent` = `#f7f7f7`
+- [x] ↳ 테스트: `browser_click`으로 다크 토글 후 같은 표를 다시 읽어 `.dark` 중성 토큰이 변경 전과 동일한지 확인 **(S)** — 토글 전후 표 31행이 문자 단위로 동일, 가로 스크롤 없음
+- [x] ↳ 테스트: `/examples/theme`의 radius 스케일에서 `rounded-xs < sm < md < lg` 순서와 `rounded-lg` = 6px 확인 **(S)** — 실측 xs 2.4px < sm 3.6px < md 4.8px < lg 6px, 역전 없음
+- [x] ↳ 테스트: `/examples/assets`의 폰트 실측 표에서 `font-sans`에 Pretendard가, `font-mono`에 Geist Mono가 나타나는지 확인 **(S)** — `font-sans` = `pretendard`(가변축 `45 920`, **status: loaded**), `font-mono` = `Geist Mono`(loaded). Fallback은 unloaded — 시스템 폰트로 떨어지지 않음
+- [x] ↳ 테스트: `/`·`/examples` 9개 화면을 순회하며 `browser_console_messages`로 콘솔 회귀 확인 **(S)** — 12개 화면 순회. 허용 목록 외 404가 1건 나왔고 조사 결과 M0 회귀가 아니라 `/examples/error-handling`의 의도된 링크 프리페치였습니다. **§0.4의 허용 목록을 2건으로 정정**했습니다
+
+> 위 순회 중 **차트 5색도 함께 확인**했습니다 — 라이트/다크 5쌍이 모두 상이하고 a/b 성분이 0이 아닙니다(무채색 아님). M5 체크리스트 첫 항목(`--chart-*` 교체)은 `8379ac8`에서 이미 끝나 있습니다.
+
+### 타입 스케일 결정 (2026-09-23 확정)
+
+PRD §9.3의 4단계 중 **32px/700만 `--text-title` 토큰으로 만들고, 나머지 24/16/14px는 새 토큰 없이 `text-2xl` · `text-base` · `text-sm`을 씁니다.**
+
+| 결정 | 내용 | 근거 |
+| :--- | :--- | :--- |
+| 32px을 토큰으로 | `globals.css`의 `@theme inline`에 `--text-title: 2rem` + `--text-title--line-height: calc(2.5 / 2)` (`globals.css:34-35`) | Tailwind v4 기본 스텝에 **32px만 없습니다**(`node_modules/tailwindcss/theme.css` 347~372행: `--text-3xl` = 30px, `--text-4xl` = 36px). `--text-*`는 v4의 1급 테마 네임스페이스이고 12단계 모두 `--text-<name>--line-height` 짝을 가지므로 같은 규약으로 한 단계만 추가한 것입니다 |
+| `text-[2rem]` 임의값을 쓰지 않음 | 토큰 한 곳에 묶음 | "테마는 `globals.css` 한 곳"이라는 저장소 규약. 32px 매직 넘버가 화면마다 흩어지면 나중에 바꿀 때 전수 검색이 필요합니다 |
+| `:root`/`.dark`에 넣지 않음 | `@theme inline`에만 | §5.3의 "세 곳 함께"는 **색 토큰 규칙**입니다. 글자 크기가 테마별로 달라질 이유가 없고, 옮기면 다크에서만 어긋날 여지만 생깁니다 |
+| 적용 범위는 `src/app/page.tsx:26` **한 곳** | `/examples`(`text-4xl`)·`/icons`(`text-3xl`)의 h1은 **의도적으로 바꾸지 않음** | §1이 `/examples`를 스택 검증 자산이자 **M0의 판정 도구**로 규정합니다. 같은 Phase에서 판정 도구의 타이포를 바꾸면 회귀 판정의 기준선이 흔들립니다 |
+
+M1 이후 새 화면의 페이지 타이틀은 `text-title font-bold tracking-tight`를 씁니다.
 
 ### 완료 기준 (DoD)
+
+**전 항목 2026-09-23 통과.** 정적 검증은 `npm run check-all`(lint → build → typecheck) 종료 코드 0, 정적 페이지 24개 생성. 동작 검증은 프로덕션 빌드(`npm run start -p 3100`) 위에서 Playwright MCP로 수행했습니다.
 
 - `npm run lint` · `npx tsc --noEmit` · `npm run build` 3개가 모두 오류 없이 끝난다.
 - `/examples/theme`의 computed 값 비교표에서 라이트의 `--foreground`와 `--primary`가 **`oklch(0 0 0)` 계열(rgb(0, 0, 0))** 로 읽히고, `--muted-foreground`가 `#444444` 계열로 읽힌다.
@@ -172,15 +219,16 @@ M0 디자인 토큰 ──┐
 - `/examples/assets`의 폰트 실측 표에서 `font-sans`의 적용 family에 **Pretendard가 나타난다**(시스템 폰트 폴백이 아님). `font-mono`는 Geist Mono 유지.
 - 다크 모드 토글 후에도 `/examples/theme`가 깨지지 않고, `.dark` 중성 토큰 값이 변경 전과 동일하다.
 - 한글 텍스트가 있는 화면(`/`, `/examples`)에서 글꼴이 Pretendard로 렌더된다(`/examples/assets`의 실측 표를 `browser_snapshot`으로 확인 — 개발자도구 육안 확인으로 대체하지 않습니다).
-- **위 테스트 항목 5개를 Playwright MCP로 전부 수행해 통과했고, 콘솔에 의도된 1건 외 에러가 없다.**
+- **위 테스트 항목 5개를 Playwright MCP로 전부 수행해 통과했고, 콘솔에 §0.4의 의도된 2건 외 에러가 없다.**
 
 ### 위험 · 주의
 
 - **색 토큰은 세 곳을 함께 고쳐야 합니다** (`:root` · `.dark` · `@theme inline`). 이번 작업은 기존 토큰의 **값만** 바꾸므로 `@theme inline` 항목 추가는 `--radius-xs` 하나뿐입니다. 새 토큰을 만들면 세 곳 규칙이 다시 적용됩니다.
 - 하나라도 빠뜨리면 **빌드 에러 없이 조용히 실패**합니다. 반드시 `/examples/theme`의 실측 값으로 확인하세요.
-- `--font-sans` 변수명을 바꾸면 `@theme inline`의 `--font-sans: var(--font-sans)`와 `html { @apply font-sans }`가 끊겨 **폰트가 조용히 적용되지 않습니다** (`src/app/layout.tsx:12`의 비표준 배선이 정확히 이 이유로 존재합니다).
+- `--font-sans` 변수명을 바꾸면 `@theme inline`의 `--font-sans: var(--font-sans)`와 `html { @apply font-sans }`가 끊겨 **폰트가 조용히 적용되지 않습니다** (`src/app/layout.tsx:17-23`의 비표준 배선이 정확히 이 이유로 존재합니다).
 - `shadow-*`는 앱 화면에서 쓰지 않되, `dropdown-menu`·`popover`·`select`·`tabs` 4개 CLI 생성 파일의 기본 그림자는 **손대지 않습니다** (PRD §9.4).
-- 차트 5색(§9.2)은 이 Phase에서 **하지 않습니다.** M5에서 리포트와 함께 넣습니다.
+- **`oklch()`는 `getComputedStyle`에서 `lab()`으로 직렬화됩니다.** `/examples/theme`의 computed 값 표에 `rgb(...)`가 아니라 `lab(...)`이 찍히므로, 위 DoD의 `rgb(0, 0, 0)`·`#444444`와 문자열로 직접 비교되지 않습니다. sRGB로 환산해 대조하고, **표기가 다르다는 이유로 토큰을 고치지 마십시오**(§0.4-1).
+- ~~차트 5색(§9.2)은 이 Phase에서 **하지 않습니다.** M5에서 리포트와 함께 넣습니다.~~ → **커밋 `8379ac8`에서 이미 들어갔고 2026-09-23 검증에서 라이트/다크 5쌍이 서로 다른 유채색임을 확인**했습니다(`globals.css:95-99` ↔ `147-151`). M5의 첫 체크리스트 항목은 재작업이 아니라 **확인**만 하면 됩니다.
 
 ---
 
@@ -485,3 +533,4 @@ PRD 안에는 미결 항목이 없습니다. 아래는 **PRD가 다루지 않아
 | :--- | :--- | :--- |
 | 2026-09-22 | 최초 작성. M0(디자인 기반) ~ M5(리포트) 6개 Phase와 백로그 정의 | `docs/기획서_결과.md` 전면 갱신(§7·§8·§9 확정)에 따라 실행 계획으로 전환 |
 | 2026-09-22 | **테스트 절차를 계획에 편입.** §0.3 검증 수단의 "브라우저 수동 확인"을 **Playwright MCP**로 교체하고 §0.4 테스트 원칙(네 축 검증·도구·판정 기준) 신설. M0~M5 전 Phase에 `↳ 테스트:` 체크리스트 항목과 "Playwright MCP 전 항목 통과" DoD 추가 | 구현만 끝내고 검증 없이 넘어가는 것을 막기 위함. 특히 API 연동·비즈니스 로직(MIT 3개 제한, `mit_order` 재배치, 집계)은 틀려도 예외가 나지 않아 **실행해 보지 않으면 드러나지 않습니다.** 구현 에이전트(`nextjs-app-router`·`drizzle-data-layer`) 정의에도 같은 프로토콜을 반영 |
+| 2026-09-23 | **§0 현황표를 실측으로 재작성하고 M0를 완료 처리.** ① 머리말의 검증 시점·git 상태를 `main`/커밋 2건으로 정정 ② §0.2에 있던 DESIGN.md 토큰·`--radius`·`--radius-xs`·Pretendard·차트 5색과 **DB 계층(Drizzle·better-sqlite3·`src/db/`·마이그레이션·`data/todo.db`)·`@dnd-kit/*`**를 §0.1로 이동(전부 커밋 `8379ac8` 선반영분) ③ M0 체크리스트 13개 전부 체크 + 반영 경위를 두 갈래로 명시 ④ **타입 스케일 결정(`--text-title`, `/examples` 미변경)** 절 신설 ⑤ **허용 콘솔 오류를 1건 → 2건으로 정정**하고 `oklch`→`lab` 직렬화 함정 추가 | §0이 2026-09-22 기준이라 **이미 끝난 항목이 "아직 없는 것"에 남아 있었고**, 그대로 두면 M1이 잘못된 전제(스키마·DB 클라이언트·dnd-kit 부재)에서 시작합니다. 2번째 콘솔 오류는 **M0-4에서 프로덕션 빌드로 12개 화면을 처음 순회하면서** 드러났습니다 — dev에서만 보던 기존 기준이 불완전했던 것이며 M0 회귀가 아닙니다 |

@@ -16,16 +16,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run lint` | ESLint (flat config) |
 | `npm run lint:fix` | ESLint 자동 수정 |
 | `npm run typecheck` | 타입 체크 (`tsc --noEmit`) |
+| `npm run check-all` | lint → build → typecheck 일괄 검증 (**이 순서 고정**) |
 | `npx shadcn@latest add <name>` | UI 컴포넌트 추가 (`--dry-run`으로 미리보기) |
 | `npm run db:generate` | 스키마 → 마이그레이션 SQL 생성 (`drizzle/`) |
 | `npm run db:migrate` | 마이그레이션 적용 (`data/todo.db`) |
 | `npm run db:studio` | DB 내용 확인 (drizzle studio) |
 | `npm run gen:sample-image` | `public/examples/sample.jpg` 재생성 (sharp, 오프라인) |
 
-- **테스트 프레임워크가 설치되어 있지 않습니다.** 테스트 러너·설정·테스트 파일 모두 없으므로, 없는 테스트 명령을 지어내지 말고 변경 검증은 `lint` + `typecheck` + `build`로 하세요.
+- **테스트 프레임워크가 설치되어 있지 않습니다.** 테스트 러너·설정·테스트 파일 모두 없으므로 **없는 테스트 명령을 지어내지 마세요.** 정적 검증은 `npm run check-all` 하나로 하고, 화면 동작은 Playwright MCP로 확인합니다 — 완료 판정 절차는 아래 `## 작업 완료 체크리스트`.
 - **캐시·revalidate는 `next dev`에서 검증할 수 없습니다.** dev는 매 요청 재렌더하므로 `revalidatePath`의 효과, `dynamic = "force-static"`, 프리렌더된 페이지의 '서버 렌더 시각'이 모두 구분되지 않습니다. `npm run build && npm run start`로 확인하세요.
 - **`next build`는 린트를 실행하지 않습니다** (Next 16 변경). 린트는 반드시 따로 돌려야 합니다.
 - 갓 클론한 트리에는 `.next/types`가 없어 `tsc --noEmit`이 `LayoutProps` 같은 전역 타입을 찾지 못합니다. `npm run dev` 또는 `npm run build`를 **한 번 돌린 뒤** 타입 체크하세요.
+
+---
+
+## 작업 완료 체크리스트
+
+**"구현이 끝났다"와 "작업이 끝났다"는 다릅니다.** 1단계는 항상 하고, 2~4단계는 **해당할 때만** 합니다. 앞 단계가 실패하면 뒤 단계로 넘어가지 마세요.
+
+### 1단계 (항상) — 정적 검증
+
+```bash
+npm run check-all   # lint → build → typecheck
+```
+
+**이 순서는 고정입니다.** `tsc --noEmit`이 참조하는 `LayoutProps`·`PageProps`는 `next build`가 만드는 `.next/types`에 있습니다. build보다 먼저 타입 체크하면 갓 클론한 트리에서 **실재하지 않는 타입 에러**가 납니다(위 주의 마지막 불릿). lint가 맨 앞인 것은 가장 싼 검사로 먼저 실패시키기 위해서입니다. 개별 명령을 따로 돌릴 때도 같은 순서를 지키세요.
+
+### 2단계 (화면·컴포넌트·색 토큰을 고쳤다면) — Playwright MCP
+
+- 고친 대상에 대응하는 검증 화면을 엽니다. 무엇을 고쳤을 때 어디를 여는지는 아래 `## /examples — 기술 스택 검증 화면`.
+- 판정 근거는 `browser_snapshot`의 텍스트·role입니다. **스크린샷의 인상은 근거가 아닙니다.** 도구별 용도는 `shrimp-rules.md` §6.3.
+- 같은 화면에서 `browser_console_messages`로 콘솔 회귀를 확인합니다. 허용 오류 기준은 `shrimp-rules.md` §6.4.
+
+### 3단계 (DB 쓰기 경로를 고쳤다면) — 행 대조
+
+- **화면이 맞아 보여도 행은 틀릴 수 있습니다.** `npm run db:studio`로 실제로 무엇이 남았는지 대조하세요.
+- 정상 · 경계값 · 실패 · 영속성 **네 축을 전부** 봅니다(`shrimp-rules.md` §6.3). **정상 경로 하나로 통과시키지 마세요.**
+
+### 4단계 (캐시·`revalidatePath`·LCP가 걸렸다면) — 프로덕션 빌드 위에서
+
+```bash
+npm run build && npm run start
+```
+
+`next dev`는 매 요청 재렌더하므로 `revalidatePath`의 효과, `dynamic = "force-static"`, '서버 렌더 시각', LCP가 **모두 구분되지 않습니다**(위 주의 두 번째 불릿). 2·3단계 대상이 여기에 걸려 있다면 dev가 아니라 이 위에서 다시 하세요.
 
 ---
 
@@ -154,7 +188,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`next/image`의 `width`/`height`는 원본의 종횡비와 정확히 같아야 합니다.** Tailwind preflight의 `img { height: auto }`가 실제 비율로 높이를 다시 계산하므로, 비율이 어긋나면 한쪽 치수만 달라져 Next.js가 종횡비 경고를 냅니다. 화면 크기는 CSS로 줄이고 속성에는 원본 크기를 넣으세요. (`next.svg`는 `394×80`입니다.)
 - **`type="password"` 입력은 `<form>` 안에 두고 `autoComplete`을 주세요.** 둘 중 하나라도 빠지면 Chrome이 콘솔에 힌트를 남깁니다. 하나를 고치면 다른 하나가 드러납니다.
 - **`notFound()`는 dev에서 "Encountered a script tag while rendering React component" 오류를 남깁니다.** Next.js가 렌더하는 `<script id="_R_">` 때문이고 **우리 코드 문제가 아닙니다.** 커스텀 `not-found.tsx`를 치우고 Next 기본 404로도 재현되며, 프로덕션 빌드에서는 나오지 않습니다. 쫓지 마세요.
-- **`/examples/components`에는 콘솔 404가 한 건 남습니다.** `AvatarImage`의 로드 실패 → `Fallback` 전환을 보여주는 의도된 데모입니다. 이 한 건 말고 콘솔에 무언가 있으면 회귀입니다.
+- **허용되는 콘솔 404는 두 건입니다.** 그 외에 무언가 있으면 회귀입니다.
+  1. `/examples/components` — `AvatarImage`의 로드 실패 → `Fallback` 전환을 보여주는 의도된 데모.
+  2. `/examples/error-handling` — `/examples/posts/없는-글?_rsc=…` 404. `src/app/examples/error-handling/page.tsx:104`의 링크를 Next `<Link>`의 기본 프리페치가 당겨오면서 납니다. **2026-09-23 프로덕션 빌드로 12개 화면을 처음 순회하면서 드러났습니다** — dev에서는 `notFound()` 노이즈에 묻혀 보이지 않았습니다. `/examples`는 판정 도구이므로 `prefetch={false}`로 고치지 마세요.
 
 ### ESLint의 React Compiler 규칙이 활성입니다
 

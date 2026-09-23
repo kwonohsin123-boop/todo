@@ -13,11 +13,17 @@ export default function Home() {
     <div className="mx-auto w-full max-w-5xl px-4 py-10">
       <header className="flex flex-col gap-2">
         {/*
-          TODO(nextjs-app-router): PRD §9.3의 페이지 타이틀은 32px/700입니다.
-          Tailwind 기본 스텝에 32px가 없어 text-3xl(30px)로 두었습니다.
-          text-[2rem] 또는 @theme의 --text-title 추가 중 하나로 확정하세요.
+          PRD §9.3의 페이지 타이틀 32px/700은 globals.css의 @theme inline에 추가한
+          --text-title(2rem) 토큰으로 확정했습니다. Tailwind 기본 스텝에는 32px가 없어
+          text-3xl(30px)이면 2px 모자란 채로 빌드가 통과합니다 — 눈으로는 잡히지 않으므로
+          임의값 text-[2rem]을 화면마다 반복하는 대신 토큰 한 곳에 묶었습니다.
+          font-bold(700)와 tracking-tight는 §9.3이 말하는 굵은 weight·음수 자간을 이미 만족합니다.
+
+          /examples·/icons의 h1은 의도적으로 바꾸지 않았습니다. 그 화면들은 데모가 아니라
+          스택 검증 자산(ROADMAP §1)이고 M0 판정 도구로 쓰이므로, 같은 Phase에서 타이포를
+          건드리면 회귀 판정의 기준선이 흔들립니다.
         */}
-        <h1 className="text-3xl font-bold tracking-tight">오늘의 MIT</h1>
+        <h1 className="text-title font-bold tracking-tight">오늘의 MIT</h1>
         {/* TODO(nextjs-app-router): todayKey()로 오늘 날짜를 ko-KR/Asia/Seoul 포맷으로 표시.
             todayKey()는 인자 없이 부르면 내부에서 new Date()를 호출하므로
             컴포넌트 본문이 아니라 서버 경계(page의 async 본문 밖 또는 Server Action)에서 호출하세요. */}

@@ -28,7 +28,11 @@ type TokenRow = {
  * 지금 테마를 바꾸지 않고도 다크 값을 그대로 얻을 수 있습니다.
  *
  * 값이 라이트와 다크에서 같은 토큰에는 "동일" 배지가 붙습니다.
- * chart-1부터 chart-5까지가 여기에 걸리는데, baseColor가 neutral이라 애초에 같은 값이기 때문입니다.
+ * 차트 5색(--chart-1 ~ --chart-5)은 PRD §9.2 적용으로 라이트/다크가 서로 다른 값이 되어
+ * 더 이상 여기에 걸리지 않습니다. 실측 기준 "동일"이 붙는 토큰은 --sidebar-primary-foreground 하나뿐입니다.
+ * 이 1개라는 숫자가 판정 기준입니다. `shadcn` CLI로 테마를 재생성하면 차트 토큰이
+ * 무채색·라이트=다크 상태로 되돌아가 배지가 6개로 늘어나므로, 배지가 늘었다면 이 측정 로직이 아니라
+ * globals.css의 차트 토큰이 덮어써졌는지부터 확인하십시오.
  */
 export function TokenValueTable({ vars }: { vars: string[] }) {
   const lightRef = React.useRef<HTMLDivElement>(null)
